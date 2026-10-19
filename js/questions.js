@@ -146,6 +146,6 @@ const QUESTIONS = {
 // Rounds, prizes and timer durations are configured in one place for easy host edits.
 const MODE_CONFIG = {
   easy: { label: "EASY", rounds: 6, prize: 20, duration: 30 },
-  average: { label: "AVERAGE", rounds: 6, prize: 30, duration: 20 },
-  hard: { label: "HARD", rulesLabel: "HARDCORE", rounds: 3, prize: 50, duration: 15 }
+  average: { label: "AVERAGE", rounds: 6, prize: 30, duration: 30 },
+  hard: { label: "HARD", rulesLabel: "HARDCORE", rounds: 3, prize: 50, duration: 30 }
 };
