@@ -239,7 +239,7 @@
     acceptedAnswers.hidden = question.accepted.length === 0;
     document.getElementById("accepted-label").hidden = question.accepted.length === 0;
     document.getElementById("time-up-banner").hidden = true;
-    setTimerToInitial();
+    setTimerForNewRound();
   }
 
   function renderQuestion(question) {
@@ -347,14 +347,10 @@
     return emojiByName[slug] || "😂";
   }
 
-  function getInitialDuration() {
-    return state.durationMs > 0 ? state.durationMs : MODE_CONFIG[state.mode].duration * 1000;
-  }
-
-  function setTimerToInitial() {
+  function setTimerForNewRound() {
     state.timerState = "idle";
-    state.remainingMs = getInitialDuration();
-    state.durationMs = state.remainingMs;
+    state.durationMs = MODE_CONFIG[state.mode].duration * 1000;
+    state.remainingMs = state.durationMs;
     state.deadline = null;
     timerEditForm.hidden = true;
     timerClock.classList.remove("is-editing");
@@ -452,6 +448,7 @@
       return;
     }
     if (state.timerState === "idle" || state.timerState === "paused") {
+      if (state.remainingMs <= 0) return;
       state.deadline = Date.now() + state.remainingMs;
       state.timerState = "running";
       clearInterval(state.timerInterval);
@@ -470,7 +467,15 @@
 
   function resetTimer() {
     stopTimer();
-    setTimerToInitial();
+    state.timerState = "idle";
+    state.remainingMs = 0;
+    state.durationMs = 0;
+    state.deadline = null;
+    timerEditForm.hidden = true;
+    timerClock.classList.remove("is-editing");
+    timerDurationInput.value = formatTimerDuration(state.remainingMs);
+    clearTimeUpOverlay();
+    updateTimerDisplay();
   }
 
   function tickTimer() {
@@ -488,12 +493,14 @@
     timerValue.classList.toggle("is-critical", isCritical);
     const isRunning = state.timerState === "running";
     timerPlay.classList.toggle("is-running", isRunning);
+    timerPlay.disabled = !isRunning && state.remainingMs <= 0;
     timerPlay.setAttribute("aria-label", isRunning ? "Pause timer" : "Start timer");
     timerPlay.title = isRunning ? "Pause timer" : "Start timer";
     timerValue.setAttribute("aria-label", `Timer ${minutesText}:${secondsText}. Double-click to set the duration.`);
   }
 
   function finishTimer() {
+    if (state.timerState !== "running" || state.deadline === null) return;
     stopTimer();
     state.remainingMs = 0;
     state.timerState = "finished";
